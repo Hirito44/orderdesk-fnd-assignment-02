@@ -25,6 +25,9 @@ function openReturn(order, lines) {
   if (lines.length === 0) {
     throw new Error('a return must cover at least one line');
   }
+  if (isOutsideReturnWindow(order)) {
+    throw new Error('a return is outside the 30-day return window');
+  }
   return {
     orderId: order.id,
     lines,
