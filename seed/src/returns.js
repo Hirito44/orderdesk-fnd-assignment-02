@@ -11,6 +11,10 @@
  * @returns {object} the new return request
  */
 function openReturn(order, lines) {
+  if (!order || !order.deliveredAt) {
+    throw new Error('cannot open a return on an undelivered order; please cancel the order instead');
+  }
+  
   if (lines.length === 0) {
     throw new Error('a return must cover at least one line');
   }
