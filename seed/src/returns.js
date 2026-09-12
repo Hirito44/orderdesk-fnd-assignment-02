@@ -10,11 +10,21 @@
  * @param {Array}  lines  the order lines the customer is sending back
  * @returns {object} the new return request
  */
+function isOutsideReturnWindow(order, now = new Date()) {
+  if (!order.deliveredAt) {
+    return false;
+  }
+
+  const deliveredAt = new Date(order.deliveredAt);
+  const elapsedMilliseconds = now.getTime() - deliveredAt.getTime();
+  const thirtyDays = 30 * 24 * 60 * 60 * 1000;
+
+  return elapsedMilliseconds > thirtyDays;
+}
 function openReturn(order, lines) {
   if (lines.length === 0) {
     throw new Error('a return must cover at least one line');
   }
-
   return {
     orderId: order.id,
     lines,
