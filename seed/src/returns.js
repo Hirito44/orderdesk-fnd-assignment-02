@@ -3,13 +3,6 @@
 // A return covers one or more lines of an order. A refund against it must be
 // approved by a refunds clerk before any money moves.
 
-/**
- * Open a return request against an order.
- *
- * @param {object} order  the order being returned against
- * @param {Array}  lines  the order lines the customer is sending back
- * @returns {object} the new return request
- */
 function isOutsideReturnWindow(order, now = new Date()) {
   if (!order.deliveredAt) {
     return false;
@@ -21,13 +14,29 @@ function isOutsideReturnWindow(order, now = new Date()) {
 
   return elapsedMilliseconds > thirtyDays;
 }
+
+/**
+ * Open a return request against an order.
+ *
+ * @param {object} order the order being returned against
+ * @param {Array} lines the order lines the customer is sending back
+ * @returns {object} the new return request
+ */
 function openReturn(order, lines) {
-  if (isOutsideReturnWindow(order)) {
-    throw new Error('a return is outside the 30-day return window');
+  // Product decision: undelivered orders are rejected by ODK-178.
+  // The ODK-152 return-window rule applies only after delivery.
+  if (!order || !order.deliveredAt) {
+    throw new Error(
+      'cannot open a return on an undelivered order; please cancel the order instead'
+    );
   }
 
   if (lines.length === 0) {
     throw new Error('a return must cover at least one line');
+  }
+
+  if (isOutsideReturnWindow(order)) {
+    throw new Error('a return is outside the 30-day return window');
   }
 
   return {
